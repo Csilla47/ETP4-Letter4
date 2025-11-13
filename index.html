@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invitations – Drag & Drop Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #eef5ff;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #1a3a6d;
+  }
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .word {
+    background: #cce0ff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: grab;
+    color: #002b70;
+    font-weight: bold;
+  }
+  .blank {
+    display: inline-block;
+    min-width: 100px;
+    border-bottom: 2px dashed #bbb;
+    text-align: center;
+    margin: 0 4px;
+    padding: 2px;
+  }
+  .correct {
+    background-color: #b2f2bb;
+  }
+  .wrong {
+    background-color: #ffb3b3;
+  }
+  button {
+    margin: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .check { background: #1a73e8; color: white; }
+  .reset { background: #ddd; }
+  .score {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎯 Invitations – Drag & Drop Game</h1>
+
+<div class="container">
+  <div class="word-bank" id="wordBank"></div>
+
+  <div id="textArea">
+    <p><b>Diane</b> <span class="blank" data-id="1"></span> to Dillford Adventure Park!</p>
+    <p><b>Date:</b> <span class="blank" data-id="2"></span></p>
+    <p><b>Time:</b> <span class="blank" data-id="3"></span></p>
+    <p><b>Meeting place:</b> <span class="blank" data-id="4"></span></p>
+    <p><b>Activities:</b> <span class="blank" data-id="5"></span>, <span class="blank" data-id="6"></span>, <span class="blank" data-id="7"></span></p>
+    <p><b>Other:</b> <span class="blank" data-id="8"></span> there and back.</p>
+
+    <p><b>Dear Diane,</b></p>
+    <p><span class="blank" data-id="9"></span>! <span class="blank" data-id="10"></span>! My brother went there last summer and had a <span class="blank" data-id="11"></span>.</p>
+    <p>I also <span class="blank" data-id="12"></span> – the activities look so exciting! <span class="blank" data-id="13"></span>! Anyway, I’ll see you on Saturday. <span class="blank" data-id="14"></span>.</p>
+    <p>Thanks again,<br>Stacey</p>
+
+    <p><b>Dear Diane,</b></p>
+    <p>It was really nice of you to invite me but, <span class="blank" data-id="15"></span>.</p>
+    <p>I’m playing in a <span class="blank" data-id="16"></span> on 14 June. I’m so jealous! I’m sure it’ll be a lot of fun.</p>
+    <p><span class="blank" data-id="17"></span>? You can tell me all about it and show me some pictures. If you can make it, <span class="blank" data-id="18"></span>.</p>
+    <p><span class="blank" data-id="19"></span>.<br><span class="blank" data-id="20"></span>,<br>Karen</p>
+  </div>
+
+  <div style="text-align:center;">
+    <button class="check" onclick="checkAnswers()">✅ Check answers</button>
+    <button class="reset" onclick="resetGame()">🔄 Reset</button>
+  </div>
+
+  <div class="score" id="score"></div>
+</div>
+
+<script>
+const blanks = [
+  { id: 1, answer: 'invites you' },
+  { id: 2, answer: 'Saturday, 14 June' },
+  { id: 3, answer: '10 a.m.' },
+  { id: 4, answer: 'my house' },
+  { id: 5, answer: 'zip-lining' },
+  { id: 6, answer: 'horse riding' },
+  { id: 7, answer: 'picnic' },
+  { id: 8, answer: 'my parents will drive us' },
+  { id: 9, answer: 'Thanks for inviting me' },
+  { id: 10, answer: 'I’d love to come' },
+  { id: 11, answer: 'fantastic time' },
+  { id: 12, answer: 'checked out the adventure park website' },
+  { id: 13, answer: 'I can’t wait to try zip-lining' },
+  { id: 14, answer: 'I’m really looking forward to it' },
+  { id: 15, answer: 'unfortunately, I’m not free' },
+  { id: 16, answer: 'tennis tournament' },
+  { id: 17, answer: 'How about meeting up on Sunday afternoon' },
+  { id: 18, answer: 'let me know' },
+  { id: 19, answer: 'Thanks again for the invitation' },
+  { id: 20, answer: 'Bye for now' }
+];
+
+const wordBank = document.getElementById('wordBank');
+const scoreBox = document.getElementById('score');
+
+function renderWords() {
+  wordBank.innerHTML = '';
+  blanks.sort(() => Math.random() - 0.5).forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'word';
+    div.textContent = b.answer;
+    div.draggable = true;
+    div.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', b.answer);
+    });
+    wordBank.appendChild(div);
+  });
+}
+
+function enableDropZones() {
+  document.querySelectorAll('.blank').forEach(blank => {
+    blank.addEventListener('dragover', e => e.preventDefault());
+    blank.addEventListener('drop', e => {
+      e.preventDefault();
+      const text = e.dataTransfer.getData('text/plain');
+      blank.textContent = text;
+      blank.classList.remove('correct','wrong');
+    });
+  });
+}
+
+function checkAnswers() {
+  let correct = 0;
+  document.querySelectorAll('.blank').forEach(blank => {
+    const id = parseInt(blank.dataset.id);
+    const correctAnswer = blanks.find(b => b.id === id).answer;
+    if (blank.textContent.trim() === correctAnswer) {
+      blank.classList.add('correct');
+      correct++;
+    } else {
+      blank.classList.add('wrong');
+    }
+  });
+  scoreBox.textContent = `✅ Correct: ${correct} / ${blanks.length}`;
+}
+
+function resetGame() {
+  document.querySelectorAll('.blank').forEach(blank => {
+    blank.textContent = '';
+    blank.classList.remove('correct','wrong');
+  });
+  scoreBox.textContent = '';
+  renderWords();
+}
+
+renderWords();
+enableDropZones();
+</script>
+</body>
+</html>
